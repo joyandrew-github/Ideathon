@@ -1,21 +1,34 @@
 // src/components/NoteForm.jsx
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import '../App.css';
 
-const NoteForm = ({ onAddNote }) => {
+const NoteForm = ({ onAddNote, onUpdateNote, noteToEdit }) => {
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
+
+  useEffect(() => {
+    if (noteToEdit) {
+      setTitle(noteToEdit.title);
+      setDescription(noteToEdit.description);
+    }
+  }, [noteToEdit]);
 
   const handleSubmit = (e) => {
     e.preventDefault();
     if (title.trim() && description.trim()) {
-      const newNote = {
-        id: Date.now(),
+      const noteData = {
+        id: noteToEdit ? noteToEdit.id : Date.now(),
         title,
         description,
-        timestamp: new Date().toLocaleString()
+        timestamp: noteToEdit ? noteToEdit.timestamp : new Date().toLocaleString(),
       };
-      onAddNote(newNote);
+      
+      if (noteToEdit) {
+        onUpdateNote(noteData);
+      } else {
+        onAddNote(noteData);
+      }
+
       setTitle('');
       setDescription('');
     }
@@ -23,7 +36,7 @@ const NoteForm = ({ onAddNote }) => {
 
   return (
     <form className="note-form" onSubmit={handleSubmit}>
-      <h2>Create a Note</h2>
+      <h2>{noteToEdit ? 'Edit Note' : 'Create a Note'}</h2>
       <input
         type="text"
         placeholder="Enter title"
@@ -38,7 +51,7 @@ const NoteForm = ({ onAddNote }) => {
         rows="4"
         required
       ></textarea>
-      <button type="submit">Add Note</button>
+      <button type="submit">{noteToEdit ? 'Update Note' : 'Add Note'}</button>
     </form>
   );
 };
